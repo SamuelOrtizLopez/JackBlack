@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Black Jack</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <style>
+        .myDiv {
+            border: 5px;
+            text-align: center;
+        }
+
+        button {
+            background-color: rgb(251, 200, 200);
+            border: rgb(245, 84, 116);
+            border-radius: 5px;
+            color: rgb(0, 0, 0);
+            padding: 5px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+        }
+
+        button:active {
+            background-color: rgb(243, 167, 167);
+            border: rgb(245, 84, 116);
+            border-radius: 5px;
+            color: rgb(0, 0, 0);
+            padding: 5px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+        }
+
+        button:hover {
+            border: rgb(245, 84, 116);
+            border-radius: 5px;
+            color: rgb(186, 53, 79);
+            padding: 5px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+        }
+
+        .resize {
+            width: 25%;
+            height: 25%;
+        }
+
+        #resultDisplay {
+            color: rgb(251, 200, 200);
+            text-align: center;
+        }
+
+        h1 {
+            color: rgb(251, 200, 200);
+            text-align: center;
+        }
+
+        p {
+            color: rgb(251, 200, 200);
+            text-align: center;
+        }
+
+    </style>
+</head>
+
+<body style="background-color:rgb(0, 0, 0);" onload="main()">
+    <script>
+
+        // all initial variables
+        let bust = false;
+        let total = 0;
+        const cardSuits = ["Hearts", "Spades", "Diamonds", "Clubs"];
+        const cardValues = ["Ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King"];
+        let alreadydrawncards = []
+        // make computer more likely to roll higher
+        const weightedcomp = [10, 11, 12, 13, 13, 14, 14, 15, 15, 16, 16, 16, 17, 17, 17, 18, 18, 18, 19, 19, 19, 19, 20, 20, 20, 20]
+        // the computer isnt going to pull cards
+        const comp = weightedcomp[random(0, weightedcomp.length)];
+
+        function stick() 
+        {
+            console.log("stick!");
+            results()
+            return;
+        }
+
+        function draw() 
+        {
+            console.log("draw!");
+            const drawnCard = drawCard();
+            total += cardvalue(drawnCard[0], total);
+            console.log("drawn:", drawnCard);
+            const cardImgPath = cardpng(drawnCard[0], drawnCard[1]);
+            console.log("path", cardImgPath);
+            addImgToDisplay(cardImgPath);
+            if (total > 21)
+            {
+                bust = true;
+                results()
+            }
+            return;
+        }
+
+        function random(min, max) {
+            return Math.floor(Math.random() * (max - min) + min);
+        }
+
+
+        function addImgToDisplay(imgPath) 
+        {
+            const cardDisplayDiv = document.querySelector("#cardDisplay");
+            console.log("cardDisplay", cardDisplayDiv);
+            cardDisplayDiv.innerHTML = cardDisplayDiv.innerHTML 
+            + '<img class="resize" src="images/' + imgPath + '" alt="card">';
+        }
+
+        function results()
+        {
+            const resultDisplayDiv = document.querySelector("#resultDisplay");
+            if (bust == true) {
+                resultDisplayDiv.innerHTML = "<h2>you busted, your total was: " + total + " computer got: " + comp + "</h2> ";
+            }
+            else {
+                if (total > comp) {
+                    resultDisplayDiv.innerHTML = "<h2>you win! your total was: " + total + " computer got: " + comp + "</h2> ";
+                }
+                else if (total < comp) {
+                    resultDisplayDiv.innerHTML = "<h2>you lose. your total was: " + total + " computer got: " + comp + "</h2> ";
+                }
+                else {
+                    resultDisplayDiv.innerHTML = "<h2>you and computer drew with a score of: " + total + "</h2>";
+                }
+            }
+        }
+
+        function cardpng(x, y) {
+            let card = x.concat(" of ", y);
+            card = card.toLowerCase();
+            card = card.replaceAll(" ", "_");
+            card = card.concat(".png");
+            console.log("Generated iamgePath:", card);
+            return card;
+        }
+
+        function cardvalue(card, total) {
+            if (card == "Ace") {
+                if (total + 11 > 21) {
+                    card = 1;
+                }
+                else {
+                    card = 11;
+                }
+            }
+            else if (card == "Jack" || card == "Queen" || card == "King") {
+                card = 10;
+            }
+            else {
+                card = parseInt(card);
+            }
+            return card;
+        }
+
+        function drawCard() 
+        {
+            console.log(alreadydrawncards);
+            let card = [cardValues[random(0, cardValues.length)], cardSuits[random(0, cardSuits.length)]];
+            if (alreadydrawncards.includes(cardpng(card[0], card[1])))
+            {
+                drawCard();
+            }
+            else
+            {
+                alreadydrawncards.push(cardpng(card[0], card[1]));
+                return card;
+            }
+        }
+
+        function main() {
+            console.log("This is blackjack google the rules (ace rule included).");
+            console.log("to start press 'ok'.");
+            // begin 
+            // first card 
+            let first = drawCard();
+
+            // second card 
+            let second = drawCard();
+
+            console.log("you drew:");
+            console.log(first[0], "of", first[1]);
+            console.log(second[0], "of", second[1]);
+
+            cardimg1 = cardpng(first[0], first[1]);
+            cardimg2 = cardpng(second[0], second[1]);
+            addImgToDisplay(cardimg1);
+            addImgToDisplay(cardimg2);
+
+
+            // assigning card values + total after drawing 2 cards
+            let b = cardvalue(first[0], total);
+            total += b
+            let d = cardvalue(second[0], total);
+            total += d
+        }
+
+    </script>
+    <h1>Black Jack</h1>
+    <p>google the rules</p>
+    <div id="cardDisplay" class="myDiv">
+        
+    </div>
+    <div class="myDiv">
+        <button onclick="draw()">draw</button>
+        <button onclick="stick()">stick</button>
+    </div>
+    <div id="resultDisplay">
+        
+    </div>
+</body>
+
+</html>
